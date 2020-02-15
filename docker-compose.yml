@@ -1,0 +1,64 @@
+version: '3'
+networks:
+  internal:
+    driver: bridge
+services:
+  influxdb:
+    hostname: influxdb
+    container_name: influxdb
+    image: influxdb
+    networks:
+      - internal
+    ports:
+      - 8086:8086
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+    restart: unless-stopped
+  varken:
+    hostname: varken
+    container_name: varken
+    image: boerderij/varken
+    networks:
+      - internal
+    ports:
+      - 8189:8181
+    volumes:
+      - ./varken/config:/config
+    environment:
+      - TZ=America/Chicago
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+  grafana:
+    hostname: grafana
+    container_name: grafana
+    image: grafana/grafana
+    networks:
+      - internal
+    ports:
+      - 3000:3000
+    volumes: 
+      - ./grafana/config:/config
+    environment:
+      - GF_PATHS_DATA=/config/data
+      - GF_PATHS_LOGS=/config/logs
+      - GF_PATHS_PLUGINS=/config/plugins
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    depends_on:
+      - influxdb
+      - varken
+    restart: unless-stopped
+  organizr:
+    hostname: organizr
+    image: linuxserver/organizr
+    container_name: organizr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ= Pacific/Auckland
+    volumes:
+      - ./organizr/config:/config
+    ports:
+      - 9983:80
+    restart: unless-stopped
+
