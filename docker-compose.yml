@@ -15,14 +15,8 @@ services:
       - 9091:9090
     links:
       - cadvisor:cadvisor
-      - node-exporter:node-exporter
 
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: monitoring_node_exporter
-    restart: unless-stopped
-    expose:
-      - 9100
+# There is node-exporter installed on host machine (not reccomended to run node-exporter through docker)
 
   cadvisor:
     image: google/cadvisor:latest
